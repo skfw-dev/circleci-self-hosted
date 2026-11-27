@@ -1,0 +1,29 @@
+# Copy to .circleci/config.yml in the repository whose jobs should run on
+# your runner, and replace the resource_class value.
+#
+# A machine runner job needs exactly two things: `machine: true` and your
+# `resource_class`. A `docker:` executor would send the job to CircleCI cloud
+# (or to a Kubernetes container runner) instead.
+
+version: 2.1
+
+jobs:
+  hello-runner:
+    machine: true
+    resource_class: your-namespace/your-resource-class
+    steps:
+      - checkout
+      - run:
+          name: Show where this job runs
+          command: |
+            echo "Runner host: $(hostname)"
+            echo "User: $(id -un)"
+            uname -srm
+            git --version
+      # Works only with the Docker-out-of-Docker overlay (./setup.sh --dood):
+      # - run: docker version
+
+workflows:
+  verify-runner:
+    jobs:
+      - hello-runner

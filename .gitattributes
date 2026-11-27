@@ -1,0 +1,4 @@
+# Shell scripts and files copied into Linux containers must keep LF endings,
+# including when the repository is checked out on Windows.
+* text=auto eol=lf
+*.zip binary

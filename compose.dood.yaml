@@ -1,0 +1,18 @@
+# Optional overlay: Docker-out-of-Docker.
+#
+# Jobs can run `docker build`, `docker compose` and so on against the HOST's
+# Docker daemon. Anyone who can run a job on this runner can therefore start a
+# privileged container and take over the host. Use only with repositories and
+# contributors you trust.
+#
+# Enabled by ./setup.sh --dood, which sets in .env:
+#   COMPOSE_FILE=compose.yaml:compose.dood.yaml
+#   RUNNER_BUILD_TARGET=runner-dood
+#   DOCKER_GID=<group id that owns /var/run/docker.sock on the host>
+
+services:
+  runner:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:?DOCKER_GID is not set - run ./setup.sh --dood}"

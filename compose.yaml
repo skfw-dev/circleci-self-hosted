@@ -1,0 +1,40 @@
+# CircleCI machine runner 3 on a single Docker host.
+#
+# Settings come from two files that ./setup.sh writes:
+#   .env        -> values interpolated into this file (not secret)
+#   runner.env  -> environment of the runner container (holds the token)
+
+name: circleci-runner
+
+services:
+  runner:
+    image: ${RUNNER_LOCAL_IMAGE:-circleci-self-hosted-runner:local}
+    build:
+      context: .
+      target: ${RUNNER_BUILD_TARGET:-runner}
+      args:
+        RUNNER_IMAGE_TAG: ${RUNNER_IMAGE_TAG:-machine-3}
+        EXTRA_APT_PACKAGES: ${EXTRA_APT_PACKAGES:-}
+    env_file:
+      - path: runner.env
+        required: true
+    restart: unless-stopped
+    # PID 1 is an init process: it reaps zombies left by job steps and
+    # forwards signals to the runner.
+    init: true
+    # `docker stop` sends TERM; the runner then finishes its active job before
+    # exiting. Docker kills the container when this period runs out.
+    stop_grace_period: ${RUNNER_STOP_GRACE_PERIOD:-10m}
+    deploy:
+      replicas: ${RUNNER_REPLICAS:-1}
+      resources:
+        limits:
+          # 0 means "no limit".
+          cpus: "${RUNNER_CPUS:-0}"
+          memory: ${RUNNER_MEMORY:-0}
+          pids: ${RUNNER_PIDS_LIMIT:-4096}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

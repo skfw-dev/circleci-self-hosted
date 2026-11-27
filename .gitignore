@@ -1,0 +1,7 @@
+# Local configuration; runner.env holds the resource class token.
+.env
+runner.env
+*.bak
+
+# Release archive
+*.zip
